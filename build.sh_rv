@@ -8,6 +8,7 @@ if [ $# -eq 0 ];then
 	echo './run.sh d  (defconfig)'
 	echo './run.sh m  (menuconfig)'
 	echo './run.sh c  (compile)'
+	echo './run.sh i  (make initramfs)'
 	exit 1
 fi
 
@@ -22,3 +23,29 @@ fi
 if [ "x$1" == "xc" ];then
 	make O=${C_OUT_DIR} CROSS_COMPILE=${C_CROSS_COMPILE} -j4
 fi
+
+if [ "x$1" == "xi" ];then
+	rm -rf initramfs
+	mkdir initramfs
+	cd initramfs
+	mkdir -p {bin,sbin,dev,etc,home,mnt,proc,sys,usr,tmp}
+	mkdir -p usr/{bin,sbin}
+	mkdir -p proc/sys/kernel
+	cp ../out_rv/busybox bin/
+	echo '#!/bin/busybox sh
+
+# Make symlinks
+/bin/busybox --install -s
+
+# Mount system
+mount -t devtmpfs  devtmpfs  /dev
+mount -t proc      proc      /proc
+mount -t sysfs     sysfs     /sys
+mount -t tmpfs     tmpfs     /tmp
+sh
+' > init
+chmod +x init
+find . | cpio -oH newc > ../initramfs.cpio
+
+fi
+
