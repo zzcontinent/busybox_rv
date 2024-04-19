@@ -1,0 +1,24 @@
+#!/bin/bash
+
+C_OUT_DIR=out_rv
+C_CROSS_COMPILE=riscv64-linux-gnu-
+C_QEMU=qemu-system-riscv64
+
+if [ $# -eq 0 ];then
+	echo './run.sh d  (defconfig)'
+	echo './run.sh m  (menuconfig)'
+	echo './run.sh c  (compile)'
+	exit 1
+fi
+
+if [ "x$1" == "xd" ];then
+	make O=${C_OUT_DIR} CROSS_COMPILE=${C_CROSS_COMPILE} defconfig
+fi
+
+if [ "x$1" == "xm" ];then
+	make O=${C_OUT_DIR} CROSS_COMPILE=${C_CROSS_COMPILE} menuconfig
+fi
+
+if [ "x$1" == "xc" ];then
+	make O=${C_OUT_DIR} CROSS_COMPILE=${C_CROSS_COMPILE} -j4
+fi
